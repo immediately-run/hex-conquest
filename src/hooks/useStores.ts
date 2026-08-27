@@ -49,13 +49,15 @@ export function useStores(): Stores {
         const cfg = await readJson<Config>(configPath(p), {});
         if (cancelled) return;
         configRef.current = cfg;
-        setPriv(p);
         if (!cfg.seeded) {
+          // Seed before publishing the store, so the first lobby listing already has it.
           await seedDemoGame(p);
           if (cancelled) return;
           configRef.current = { ...cfg, seeded: true };
           await writeJson(configPath(p), configRef.current);
         }
+        if (cancelled) return;
+        setPriv(p);
         if (cfg.spaceId) {
           const s = await openRememberedSpace(cfg.spaceId);
           if (cancelled) return;

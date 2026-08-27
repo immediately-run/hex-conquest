@@ -1,5 +1,5 @@
 import { seatStatus, type GameSummary } from '../lib/games';
-import { citiesOf, NEUTRAL } from '../lib/engine';
+import { citiesOf, possessive, NEUTRAL } from '../lib/engine';
 import type { Store } from '../lib/store';
 
 interface Props {
@@ -25,7 +25,7 @@ function GameCard({ store, game, login, onOpen, onJoin, onDelete }: Props) {
   else if (status.kind === 'mine') line = 'Your move';
   else if (status.kind === 'ai') line = 'Computer to move';
   else if (status.kind === 'waiting') line = `Waiting for ${status.login}`;
-  else line = `${state.players[state.current].name}'s seat is open`;
+  else line = `${possessive(state.players[state.current].name)} seat is open`;
 
   return (
     <div className="card">

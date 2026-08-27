@@ -598,6 +598,5 @@ export const hexesWithin = (s: GameState, h: Hex, radius: number): Hex[] => ring
 export const canAct = (s: GameState, u: Unit): boolean =>
   u.owner === s.current && (reachable(s, u).size > 0 || attackTargets(s, u).length > 0 || canFound(s, u));
 
-export function turnNumberLabel(s: GameState): string {
-  return `Turn ${s.turn} of ${s.settings.turnLimit}`;
-}
+/** "Ada's" — with a special case so the demo's "You" reads as "Your". */
+export const possessive = (name: string): string => (name.toLowerCase() === 'you' ? 'Your' : `${name}'s`);

@@ -13,6 +13,7 @@ interface Props {
 }
 
 const SIZE = 30;
+const PAD = 10;
 const MIN_ZOOM = 0.6;
 const MAX_ZOOM = 4;
 
@@ -50,7 +51,7 @@ function HexMap({ state, selectedUnit, selectedCityId, reach, targetIds, onTap }
     const el = svgRef.current;
     if (!el) return 1;
     const r = el.getBoundingClientRect();
-    return Math.max(px.w / r.width, px.h / r.height);
+    return Math.max((px.w + 2 * PAD) / r.width, (px.h + 2 * PAD) / r.height);
   }, [px.w, px.h]);
 
   const toLocal = useCallback(
@@ -59,9 +60,9 @@ function HexMap({ state, selectedUnit, selectedCityId, reach, targetIds, onTap }
       const r = el.getBoundingClientRect();
       const u = unitsPerPx();
       // Offset for the letterboxing "meet" adds.
-      const ox = (r.width * u - px.w) / 2;
-      const oy = (r.height * u - px.h) / 2;
-      return { x: (clientX - r.left) * u - ox, y: (clientY - r.top) * u - oy };
+      const ox = (r.width * u - (px.w + 2 * PAD)) / 2;
+      const oy = (r.height * u - (px.h + 2 * PAD)) / 2;
+      return { x: (clientX - r.left) * u - ox - PAD, y: (clientY - r.top) * u - oy - PAD };
     },
     [unitsPerPx, px.w, px.h],
   );
@@ -151,7 +152,7 @@ function HexMap({ state, selectedUnit, selectedCityId, reach, targetIds, onTap }
     <div className="mapwrap">
       <svg
         ref={svgRef}
-        viewBox={`0 0 ${px.w} ${px.h}`}
+        viewBox={`${-PAD} ${-PAD} ${px.w + 2 * PAD} ${px.h + 2 * PAD}`}
         preserveAspectRatio="xMidYMid meet"
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}

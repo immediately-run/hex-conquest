@@ -1,5 +1,5 @@
 import type { GameMeta, SeatStatus } from '../lib/games';
-import { type GameState, NEUTRAL } from '../lib/engine';
+import { possessive, type GameState, NEUTRAL } from '../lib/engine';
 
 interface Props {
   state: GameState;
@@ -32,7 +32,7 @@ function TurnBanner({ state, meta, status, busy, onExit }: Props) {
       </button>
       <span className="dot" style={{ background: color(state.winner ?? state.current) }} />
       <div className="turn">
-        {state.winner !== null ? 'Game over' : `${p.name}'s turn`}
+        {state.winner !== null ? 'Game over' : `${possessive(p.name)} turn`}
         <small>
           Turn {state.turn} of {state.settings.turnLimit} · {meta.name}
         </small>

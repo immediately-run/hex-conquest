@@ -1,4 +1,8 @@
-# Working in this repo
+# Hex conquest — working in this repo
+
+Hex conquest is a small turn-based hex strategy game. The rules engine is pure
+(`src/lib/engine.ts`, tested by `npm test`), the AI is `src/lib/ai.ts`, persistence
+is one-file-per-record over the platform `fs` (`src/lib/store.ts`, `src/lib/games.ts`).
 
 This is an **immediately.run app**: React + TypeScript that loads from GitHub and
 transpiles in the browser (no server, no build step at runtime). Keep the rules
