@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { Stores } from '../hooks/useStores';
 
 interface Props {
@@ -5,10 +6,29 @@ interface Props {
 }
 
 function SharePanel({ stores }: Props) {
-  const { shared, sharedLost } = stores;
+  const { shared, sharedLost, login, loginFromAuth } = stores;
+  const [name, setName] = useState<string | null>(null);
+  const save = () => {
+    if (name !== null && name.trim() !== login) void stores.setDisplayName(name);
+    setName(null);
+  };
   return (
     <div className="card">
       <h3>Play with others</h3>
+      <div className="field" style={{ marginTop: 8 }}>
+        <label htmlFor="your-name">Your name</label>
+        <input
+          id="your-name"
+          value={name ?? login}
+          readOnly={loginFromAuth}
+          placeholder="Shown to other players"
+          maxLength={24}
+          onChange={(e) => setName(e.target.value)}
+          onBlur={save}
+          onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
+        />
+        {!login && <span className="hint">Needed to claim a seat in a shared game.</span>}
+      </div>
       {shared ? (
         <>
           <div className="meta">

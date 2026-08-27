@@ -77,6 +77,9 @@ function GameScreen({ store, gameId, login, onExit }: Props) {
         }
       }
     };
+    // Pull once up front: a claim or turn that landed while we were the actor
+    // is already in the poller's baseline, so it would never fire for it.
+    void pull();
     const stopTurns = pollDir(turnsDir(store, gameId), () => void pull(), 3000);
     const stopClaims = pollDir(playersDir(store, gameId), () => void pull(), 3000);
     return () => {

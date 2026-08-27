@@ -8,6 +8,8 @@ import { seedDemoGame } from '../lib/games';
 interface Config {
   spaceId?: string;
   seeded?: boolean;
+  /** Fallback player name when the host exposes no signed-in login (stage apps). */
+  displayName?: string;
 }
 
 export interface Stores {
@@ -17,8 +19,11 @@ export interface Stores {
   shared: Store | null;
   /** A remembered space that could not be re-mounted (grant not durable / revoked). */
   sharedLost: boolean;
-  /** GitHub login of the signed-in user, or '' when unknown. */
+  /** GitHub login of the signed-in user, else the saved display name, else ''. */
   login: string;
+  /** True when `login` comes from the host sign-in (the name field is then read-only). */
+  loginFromAuth: boolean;
+  setDisplayName: (name: string) => Promise<void>;
   createShared: () => Promise<Store | null>;
   pickShared: () => Promise<Store | null>;
   forgetShared: () => Promise<void>;
@@ -32,7 +37,9 @@ const configPath = (s: Store) => `${s.root}/config.json`;
  *  run seeds, and seeding itself is idempotent. */
 export function useStores(): Stores {
   const auth = useAuth();
-  const login = auth.status === 'signed-in' ? (auth.user?.login ?? '') : '';
+  const authLogin = auth.status === 'signed-in' ? (auth.user?.login ?? '') : '';
+  const [displayName, setDisplayNameState] = useState('');
+  const login = authLogin || displayName;
   const [priv, setPriv] = useState<Store | null>(null);
   const [shared, setShared] = useState<Store | null>(null);
   const [sharedLost, setSharedLost] = useState(false);
@@ -49,6 +56,7 @@ export function useStores(): Stores {
         const cfg = await readJson<Config>(configPath(p), {});
         if (cancelled) return;
         configRef.current = cfg;
+        setDisplayNameState(cfg.displayName ?? '');
         if (!cfg.seeded) {
           // Seed before publishing the store, so the first lobby listing already has it.
           await seedDemoGame(p);
@@ -101,6 +109,17 @@ export function useStores(): Stores {
     [remember],
   );
 
+  const setDisplayName = useCallback(
+    async (name: string) => {
+      const trimmed = name.trim().slice(0, 24);
+      setDisplayNameState(trimmed);
+      if (!priv) return;
+      configRef.current = { ...configRef.current, displayName: trimmed || undefined };
+      await writeJson(configPath(priv), configRef.current);
+    },
+    [priv],
+  );
+
   return {
     ready,
     error,
@@ -108,6 +127,8 @@ export function useStores(): Stores {
     shared,
     sharedLost,
     login,
+    loginFromAuth: Boolean(authLogin),
+    setDisplayName,
     createShared: () => wrap(() => createSharedStore('Hex Conquest')),
     pickShared: () => wrap(() => pickSharedStore()),
     forgetShared: () => remember(null),
