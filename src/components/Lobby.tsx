@@ -52,7 +52,6 @@ function Lobby({ stores, onOpen }: Props) {
   };
   const remove = async (g: GameSummary) => {
     if (!store) return;
-    if (!window.confirm(`Delete "${g.meta.name}"? This removes it for everyone in the space.`)) return;
     await deleteGame(store, g.meta.id);
     await refresh();
   };

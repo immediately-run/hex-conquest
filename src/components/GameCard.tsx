@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { seatStatus, type GameSummary } from '../lib/games';
 import { citiesOf, possessive, NEUTRAL } from '../lib/engine';
 import type { Store } from '../lib/store';
@@ -15,6 +16,8 @@ const color = (i: number): string => (i === NEUTRAL ? 'var(--pn)' : `var(--p${i}
 
 function GameCard({ store, game, login, onOpen, onJoin, onDelete }: Props) {
   const { meta, claims, state } = game;
+  // Inline confirm: window.confirm() is silently false inside a sandboxed iframe.
+  const [confirming, setConfirming] = useState(false);
   const status = seatStatus(store, game, login);
   const shared = store.kind === 'space';
   const openSeats = shared ? meta.seats.filter((s) => s.kind === 'human' && !claims[s.slot]) : [];
@@ -58,10 +61,20 @@ function GameCard({ store, game, login, onOpen, onJoin, onDelete }: Props) {
         ))}
         <span className="grow" />
         {mySeats.length > 0 && shared && <span className="hint">you: {mySeats.map((s) => s.name).join(', ')}</span>}
-        {store.mode === 'rw' && (
-          <button className="btn btn-ghost btn-sm btn-danger" type="button" onClick={onDelete}>
+        {store.mode === 'rw' && !confirming && (
+          <button className="btn btn-ghost btn-sm btn-danger" type="button" onClick={() => setConfirming(true)}>
             Delete
           </button>
+        )}
+        {confirming && (
+          <>
+            <button className="btn btn-ghost btn-sm btn-danger" type="button" onClick={onDelete}>
+              Really delete{shared ? ' for everyone' : ''}?
+            </button>
+            <button className="btn btn-ghost btn-sm" type="button" onClick={() => setConfirming(false)}>
+              Keep
+            </button>
+          </>
         )}
       </div>
     </div>
