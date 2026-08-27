@@ -1,0 +1,53 @@
+/* In-game palette. Terrain and player colours are fixed across themes so the map
+   reads the same everywhere; only the board background follows the theme. */
+:root {
+  --map-bg: #0d1220;
+  --t-plains: #8dbb6a;
+  --t-forest: #3f7c4c;
+  --t-hills: #b79b62;
+  --t-water: #3a76c4;
+  --t-edge: rgba(0,0,0,.28);
+  --p0: #4f9dff;
+  --p1: #ff6b6b;
+  --p2: #ffd166;
+  --p3: #4be0a8;
+  --pn: #a7abb8;
+  --hl-move: rgba(255,255,255,.35);
+  --hl-attack: #ff4d4d;
+  --hl-sel: #ffffff;
+  --hl-found: #ffd166;
+}
+html[data-theme="light"] { --map-bg: #dfe4f0; --t-edge: rgba(0,0,0,.18); }
+
+.hex { stroke: var(--t-edge); stroke-width: 1; }
+.hex.t-plains { fill: var(--t-plains); }
+.hex.t-forest { fill: var(--t-forest); }
+.hex.t-hills { fill: var(--t-hills); }
+.hex.t-water { fill: var(--t-water); }
+.hex.reach { cursor: pointer; }
+.deco { pointer-events: none; }
+.deco.forest { fill: rgba(0,60,20,.45); }
+.deco.hills { fill: none; stroke: rgba(90,60,20,.5); stroke-width: 2; stroke-linecap: round; }
+.deco.water { fill: none; stroke: rgba(255,255,255,.35); stroke-width: 1.2; stroke-linecap: round; }
+
+.ov { pointer-events: none; }
+.ov.move { fill: var(--hl-move); stroke: #fff; stroke-width: .8; stroke-opacity: .6; }
+.ov.attack { fill: rgba(255,77,77,.35); stroke: var(--hl-attack); stroke-width: 2; }
+.ov.sel { fill: none; stroke: var(--hl-sel); stroke-width: 2.5; }
+.ov.found { fill: none; stroke: var(--hl-found); stroke-width: 2; stroke-dasharray: 4 3; }
+.ov.citysel { fill: none; stroke: var(--hl-sel); stroke-width: 2; stroke-dasharray: 3 2; }
+
+.city { pointer-events: none; }
+.city .base { stroke: rgba(0,0,0,.45); stroke-width: 1.2; }
+.city .walls { fill: none; stroke: #fff; stroke-width: 2; stroke-dasharray: 2.5 2; }
+.city .name { font: 700 8px/1 var(--sans); fill: #fff; text-anchor: middle; paint-order: stroke; stroke: rgba(0,0,0,.65); stroke-width: 2.5; stroke-linejoin: round; }
+.city .pop { font: 700 7px/1 var(--mono); fill: #fff; text-anchor: middle; }
+
+.unit { pointer-events: none; }
+.unit .body { stroke: rgba(0,0,0,.55); stroke-width: 1.2; }
+.unit .icon { fill: none; stroke: #fff; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.unit.done .body { opacity: .55; }
+.unit .hpbg { fill: rgba(0,0,0,.5); }
+.unit .hp { fill: #6ee27a; }
+.unit .hp.low { fill: #ffb454; }
+.unit .hp.crit { fill: #ff5c5c; }

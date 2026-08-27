@@ -55,7 +55,10 @@ export async function pickSharedStore(sub = ''): Promise<Store> {
   return fromMount(await requestMount(), sub);
 }
 
-/** Create a brand-new space (host shows a consent dialog). */
+/** Create a brand-new space (host shows a consent dialog).
+ *  ⚠ Host gap (2026-08-27): `create` records NO durable grant, so `openRememberedSpace` on a
+ *  created space fails on the next load until the user grants it once via `pickSharedStore()`.
+ *  Treat a null from `openRememberedSpace` as "needs re-granting", not "gone". */
 export async function createSharedStore(name: string, sub = ''): Promise<Store> {
   if (isDev()) return { root: join(DEV_ROOT, 'shared', sub), mode: 'rw', kind: 'dev', spaceId: 'dev' };
   return fromMount(await createSpace({ name }), sub);

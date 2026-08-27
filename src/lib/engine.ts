@@ -402,9 +402,10 @@ export function attack(s: GameState, attackerId: number, defenderId: number): Ga
   assert(a!.owner === s.current, 'not your unit');
   assert(attackTargets(s, a!).some((t) => t.id === defenderId), 'target out of range');
   const pv = previewAttack(s, a!, d!);
-  let [rng, roll] = next(s.rng);
+  const [rng0, roll] = next(s.rng);
+  let rng = rng0;
   const dmg = damage(pv.attack, pv.defence, roll, 6);
-  let defenderHp = d!.hp - dmg;
+  const defenderHp = d!.hp - dmg;
   let attackerHp = a!.hp;
   let line = `${s.players[a!.owner].name}'s ${UNITS[a!.type].label.toLowerCase()} hit ${ownerName(s, d!.owner)}'s ${UNITS[d!.type].label.toLowerCase()} for ${dmg}`;
   if (defenderHp > 0 && pv.retaliates) {

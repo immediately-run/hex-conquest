@@ -4,23 +4,35 @@
 // reachable from App.tsx.
 import './index.css';
 import './App.css';
-import Nav from './components/Nav';
-import Hero from './components/Hero';
-import Features from './components/Features';
-import Counter from './components/Counter';
-import Footer from './components/Footer';
+import './game.css';
+import { useState } from 'react';
+import { useStores } from './hooks/useStores';
+import TopBar from './components/TopBar';
+import Lobby, { type StoreKind } from './components/Lobby';
+import GameScreen from './components/GameScreen';
+
+type View = { kind: 'lobby' } | { kind: 'game'; store: StoreKind; id: string };
 
 function App() {
+  const stores = useStores();
+  const [view, setView] = useState<View>({ kind: 'lobby' });
+  const store = view.kind === 'game' ? (view.store === 'shared' ? stores.shared : stores.priv) : null;
+
+  if (view.kind === 'game' && store) {
+    return (
+      <GameScreen key={`${store.root}/${view.id}`} store={store} gameId={view.id} login={stores.login} onExit={() => setView({ kind: 'lobby' })} />
+    );
+  }
+
   return (
-    <>
-      <Nav />
-      <main className="wrap">
-        <Hero />
-        <Features />
-        <Counter />
-        <Footer />
-      </main>
-    </>
+    <div className="app">
+      <TopBar login={stores.login} onHome={() => setView({ kind: 'lobby' })} />
+      {stores.ready || stores.priv ? (
+        <Lobby stores={stores} onOpen={(kind, id) => setView({ kind: 'game', store: kind, id })} />
+      ) : (
+        <div className="loading">Opening your storage…</div>
+      )}
+    </div>
   );
 }
 
