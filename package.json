@@ -1,5 +1,5 @@
 {
-  "name": "immediately-run-app",
+  "name": "hex-conquest",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,10 +10,11 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "tsc -p tsconfig.test.json && node --test 'test/**/*.test.ts'"
   },
   "dependencies": {
-    "@immediately-run/sdk": "^0.13.0",
+    "@immediately-run/sdk": "0.54.0",
     "react": "^19.2.5",
     "react-dom": "^19.2.5"
   },
@@ -32,5 +33,10 @@
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.58.2",
     "vite": "^8.0.9"
+  },
+  "immediately": {
+    "run": {
+      "requireLatest": "optimistic"
+    }
   }
 }
