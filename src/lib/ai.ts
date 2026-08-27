@@ -146,14 +146,24 @@ export function playAiTurn(s: GameState): GameState {
   const p = s.current;
   if (s.winner !== null) return s;
 
-  // Cities: choose production, then spend gold where it matters.
+  // Cities: (re)choose production whenever nothing is in progress, then spend gold.
   for (const c of citiesOf(s, p)) {
-    if (!c.production) s = setProduction(s, c.id, chooseProduction(s, c));
+    if (!c.production || c.progress === 0) {
+      const want = chooseProduction(s, c);
+      if (want !== c.production) s = setProduction(s, c.id, want);
+    }
   }
   for (const c0 of citiesOf(s, p)) {
     const c = s.cities.find((x) => x.id === c0.id)!;
+    const cities = citiesOf(s, p).length;
+    const settlers = unitsOf(s, p).filter((u) => u.type === 'settler').length;
+    const early = s.turn < s.settings.turnLimit * 0.6;
     if (!unitAt(s, c) && canBuy(s, c, 'warrior')) s = buy(s, c.id, 'warrior');
-    else if (danger(s, p, c) > 0 && canBuy(s, c, 'warrior') && s.players[p].gold >= 60) s = buy(s, c.id, 'warrior');
+    else if (early && cities + settlers < 3 && canBuy(s, c, 'settler')) s = buy(s, c.id, 'settler');
+    else if (danger(s, p, c) > 0 && !c.walls && canBuy(s, c, 'walls')) s = buy(s, c.id, 'walls');
+    else if (s.players[p].gold >= 2 * UNITS.warrior.price && canBuy(s, c, (c.id + s.turn) % 3 === 0 ? 'archer' : 'warrior')) {
+      s = buy(s, c.id, (c.id + s.turn) % 3 === 0 ? 'archer' : 'warrior');
+    }
   }
 
   // Units, settlers first (they may need an escort's tile freed later — good enough).
