@@ -52,7 +52,7 @@ function SharePanel({ stores }: Props) {
           <p className="hint" style={{ marginTop: 8 }}>
             {sharedLost
               ? 'Your remembered space needs to be granted again — open it below to continue.'
-              : 'Create or open a shared space to take turns with friends. Everyone who has the space plays from their own device; the app polls the space for new turns.'}
+              : 'Create or open a shared space to take turns with friends. Everyone who has the space plays from their own device; the app watches the space for new turns.'}
           </p>
           <div className="row">
             <button className="btn btn-primary btn-sm" type="button" onClick={() => void stores.createShared()}>

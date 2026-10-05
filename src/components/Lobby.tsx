@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { Stores } from '../hooks/useStores';
 import { claimSeat, deleteGame, gamesRoot, listGames, type GameSummary } from '../lib/games';
-import { pollDir, type Store } from '../lib/store';
+import { watchDir, type Store } from '../lib/store';
 import GameCard from './GameCard';
 import NewGameForm from './NewGameForm';
 import SharePanel from './SharePanel';
@@ -37,8 +37,9 @@ function Lobby({ stores, onOpen }: Props) {
   useEffect(() => {
     let cancelled = false;
     if (store) void listGames(store).then((list) => !cancelled && setLoaded({ root: store.root, list }));
-    // Shared spaces get no remote events: poll the games folder for claims/turns.
-    const stop = store?.kind === 'space' ? pollDir(gamesRoot(store), () => void refresh(), 3000) : undefined;
+    // R3-901: the games folder is watched recursively (the relay covers remote
+    // writes) — no 3 s poll.
+    const stop = store?.kind === 'space' ? watchDir(gamesRoot(store), () => void refresh()) : undefined;
     return () => {
       cancelled = true;
       stop?.();

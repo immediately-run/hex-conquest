@@ -5,8 +5,8 @@ import {
 } from '../lib/engine';
 import { playAiTurn } from '../lib/ai';
 import { key, type Hex } from '../lib/hex';
-import { claimSeat, loadGame, playersDir, readTurn, seatStatus, turnsDir, writeTurn, type GameSummary } from '../lib/games';
-import { pollDir, type Store } from '../lib/store';
+import { claimSeat, gameDir, loadGame, readTurn, seatStatus, writeTurn, type GameSummary } from '../lib/games';
+import { watchDir, type Store } from '../lib/store';
 import HexMap from './HexMap';
 import TurnBanner from './TurnBanner';
 import ActionBar from './ActionBar';
@@ -78,13 +78,14 @@ function GameScreen({ store, gameId, login, onExit }: Props) {
       }
     };
     // Pull once up front: a claim or turn that landed while we were the actor
-    // is already in the poller's baseline, so it would never fire for it.
+    // is already in the watcher, so it would never fire for it.
     void pull();
-    const stopTurns = pollDir(turnsDir(store, gameId), () => void pull(), 3000);
-    const stopClaims = pollDir(playersDir(store, gameId), () => void pull(), 3000);
+    // R3-901: one recursive watch on the game dir replaces the two per-dir
+    // polls (turns/ and players/ both live under it; the relay reports the
+    // changed path).
+    const stop = watchDir(gameDir(store, gameId), () => void pull());
     return () => {
-      stopTurns();
-      stopClaims();
+      stop();
     };
   }, [game, status, store, gameId]);
 
