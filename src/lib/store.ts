@@ -136,39 +136,23 @@ export async function removeFile(path: string): Promise<void> {
 export const newId = (): string =>
   `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 
-/**
- * Poll a directory for changes (shared spaces get NO remote watch events, so this is
- * the live-update mechanism). Calls `onChange` when the (name → mtime/size) map
- * differs from the last poll. Returns a stop function.
- */
-export function pollDir(dir: string, onChange: () => void, intervalMs = 3000): () => void {
-  let last: string | null = null; // null = never polled (an empty dir is a valid '' signature)
-  let stopped = false;
-  const tick = async () => {
-    if (stopped) return;
+/** R3-901 — one recursive watch replaces the 2–4 s pollDir signature loops:
+ *  the host's watch relay (R3-409) surfaces REMOTE writes as fs.promises.watch
+ *  events, recursively, with the changed path. Own writes still echo locally
+ *  (the callers' reload is idempotent, exactly as the poll's wholesale reload
+ *  was — no byte-dedupe needed, FILESYSTEM_SPEC §2.2). Returns a stop function
+ *  (aborts the loop; an abort surfaces as a rejected iteration, swallowed here). */
+export function watchDir(dir: string, onChange: () => void): () => void {
+  const ac = new AbortController();
+  void (async () => {
     try {
-      const names = await fs.promises.readdir(dir);
-      const sig = (
-        await Promise.all(
-          names.map(async (n) => {
-            try {
-              const s = await fs.promises.stat(join(dir, n));
-              return `${n}:${s.mtimeMs}:${s.size}`;
-            } catch {
-              return `${n}:?`;
-            }
-          }),
-        )
-      ).join('|');
-      if (last !== null && sig !== last) onChange();
-      last = sig;
+      for await (const ev of fs.promises.watch(dir, { recursive: true, signal: ac.signal })) {
+        void ev; // the event is the signal; the reload re-reads wholesale
+        onChange();
+      }
     } catch {
-      /* dir missing yet */
+      /* aborted on teardown, or the dir vanished */
     }
-    if (!stopped) setTimeout(tick, intervalMs);
-  };
-  void tick();
-  return () => {
-    stopped = true;
-  };
+  })();
+  return () => ac.abort();
 }
