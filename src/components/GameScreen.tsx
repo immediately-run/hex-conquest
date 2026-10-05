@@ -80,7 +80,7 @@ function GameScreen({ store, gameId, login, onExit }: Props) {
     // Pull once up front: a claim or turn that landed while we were the actor
     // is already in the watcher, so it would never fire for it.
     void pull();
-    // R3-901: ONE recursive watch on the game dir replaces the two per-dir
+    // R3-901: one recursive watch on the game dir replaces the two per-dir
     // polls (turns/ and players/ both live under it; the relay reports the
     // changed path).
     const stop = watchDir(gameDir(store, gameId), () => void pull());
