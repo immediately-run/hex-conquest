@@ -78,7 +78,7 @@ function GameScreen({ store, gameId, login, onExit }: Props) {
       }
     };
     // Pull once up front: a claim or turn that landed while we were the actor
-    // is already in the poller's baseline, so it would never fire for it.
+    // is already in the watcher, so it would never fire for it.
     void pull();
     // R3-901: ONE recursive watch on the game dir replaces the two per-dir
     // polls (turns/ and players/ both live under it; the relay reports the
